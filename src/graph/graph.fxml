@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.text.*?>
+
+<VBox id="path" fx:controller="graph.Controller" alignment="center" prefWidth="1600" prefHeight="900" maxWidth="Infinity" maxHeight="Infinity" minWidth="800" minHeight="400" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">     		   
+    <children>
+	    <MenuBar fx:id="menuBar" id="menuBar">
+	 		<menus>
+	 			<Menu fx:id="menu" styleClass="menuBar" text="Algorithm">
+		 			<items>
+		 				<MenuItem styleClass="menuItem" text="Random Guess" onAction="#chooseAlgoritm"/>		 	
+		 				<MenuItem styleClass="menuItem" text="Breadth First Search" onAction="#chooseAlgoritm"/>
+		 				<MenuItem styleClass="menuItem" text="Depth First Search" onAction="#chooseAlgoritm"/>
+		 				<MenuItem styleClass="menuItem" text="Dikstra Shortest Path" onAction="#chooseAlgoritm"/>
+		 				<MenuItem styleClass="menuItem" text="A* Search" onAction="#chooseAlgoritm"/>
+		 			</items>
+	 			</Menu>
+	 		</menus>
+	 	</MenuBar>
+	 	
+    	<Label fx:id="header" styleClass="h1" text="Pathfinder"/>
+    	<Label fx:id="subheader" styleClass="h2" text="Algorithm"/>
+	    <HBox alignment="center">
+	    	<Button fx:id="gridBtn" alignment="center" styleClass="btn" text="Generate" onAction="#generate" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+	    	<Button fx:id="bfsBtn" styleClass="btn" text="Search" onAction="#search" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+	    </HBox>
+    	 
+    
+				<GridPane fx:id="gridMap" id="gridMap" prefWidth="1280" prefHeight="720" alignment="center" GridPane.columnIndex="1" GridPane.rowIndex="3">
+					<children>
+					</children>
+				</GridPane>		
+    </children>	
+</VBox>
