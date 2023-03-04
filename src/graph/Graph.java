@@ -71,21 +71,20 @@ public class Graph {
 				adjList[y * grid.width + x] = new ArrayList<Node>();
 			}
 		}
-		
+
 		for (int y = 0; y < grid.height; y++) {
 			for (int x = 0; x < grid.width; x++) {
 
-				int[] nswe = { (y - 1) * grid.width + x, // N
-						(y + 1) * grid.width + x, // S
+				int[] nesw = { (y - 1) * grid.width + x, // N
 						y * grid.width + (x + 1), // E
+						(y + 1) * grid.width + x, // S
 						y * grid.width + (x - 1), // W
 				};
 
 				Grid.Cell cell = grid.grid[x][y];
 
 				if (adjList[y * grid.width + x] == null || !cell.isEmpty) {
-					System.out.println(y * grid.width + x);
-					System.out.println(cell != null ? cell.isStart || cell.isDest : null);
+
 					continue;
 				}
 
@@ -95,7 +94,15 @@ public class Graph {
 					Grid.Cell n = grid.grid[x][y - 1];
 
 					if (n.isEmpty) {
-						adjList[key].add(0, new Node(nswe[0]));
+						adjList[key].add(0, new Node(nesw[0]));
+					}
+				}
+
+				if (x < grid.width - 1) {
+					Grid.Cell e = grid.grid[x + 1][y];
+
+					if (e.isEmpty) {
+						adjList[key].add(0, new Node(nesw[1]));
 					}
 				}
 
@@ -103,50 +110,100 @@ public class Graph {
 					Grid.Cell s = grid.grid[x][y + 1];
 
 					if (s.isEmpty) {
-						adjList[key].add(0, new Node(nswe[1]));
-					}
-				}
-
-				if (x < grid.width - 1) {
-					Grid.Cell w = grid.grid[x + 1][y];
-
-					if (w.isEmpty) {
-						adjList[key].add(0, new Node(nswe[2]));
+						adjList[key].add(0, new Node(nesw[2]));
 					}
 				}
 
 				if (x > 0) {
-					Grid.Cell e = grid.grid[x - 1][y];
+					Grid.Cell w = grid.grid[x - 1][y];
 
-					if (e.isEmpty) {
-						adjList[key].add(0, new Node(nswe[3]));
+					if (w.isEmpty) {
+						adjList[key].add(0, new Node(nesw[3]));
 					}
 				}
+
 			}
 		}
 	}
 
 	public void shuffle(Map map) {
-		Random rng = new Random();
-
-		for (int y = 0; y < map.grid.height / 3; y++) {
-			for (int x = 0; x < map.grid.width / 3; x++) {
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-				map.updateCell(map.grid.grid[y][x]);
-
-				Grid.Cell cell = map.grid.grid[rng.nextInt(map.grid.width)][rng.nextInt(map.grid.height)];
-				cell.isEmpty = (!cell.isStart || !cell.isDest) ? rng.nextInt(5) != 0 : true;
-
-				map.updateCell(cell);
+		for (int i = 0; i < 10; i++) {
+			try {
+				Thread.sleep(Configuration.simulationRate * i / 2);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
+
+			map.randomize(new Random().nextInt());
+
+			map.updateCells();
 		}
+
+		gridToAdjList(map.grid);
+		map.updateCells();
+
+	}
+
+	public void maze(Map map) {
+		map.randomize(new Random().nextInt());
+		map.updateCells();
 		
 		gridToAdjList(map.grid);
+
+		Random rng = new Random();
+
+		Stack<Integer> stack = new Stack<Integer>();
+
+		int start = map.start.y * map.grid.width + map.start.x;
+		int dest = map.destination.y * map.grid.width + map.destination.x;
+		int current = start;
+
+		ArrayList<Integer> visited = new ArrayList<Integer>();
+		int[] parents = new int[map.grid.width + map.destination.x];
+
+		stack.push(start);
+		visited.add(start);
+
+		int maxSearch = adjList.length;
+		int searchCount = 0;
+		while (searchCount <= maxSearch) {
+			try {
+				Thread.sleep(Configuration.getSimulationRate());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			if (stack.isEmpty()) {
+				System.out.println("No path to " + dest + " found!");
+				map.grid.cells.get(dest).isVoid = true;
+				map.updateCell(map.grid.cells.get(dest));
+				break;
+			}
+
+			int last = current;
+			current = stack.pop();
+			visited.add(current);
+
+			map.grid.cells.get(current).visit();
+			map.updateCell(map.grid.cells.get(current));
+
+			List<Integer> attempts = new ArrayList<Integer>();
+			while (attempts.size() < adjList[current].size() - 1) {
+				
+				int id = (int) adjList[current].get(rng.nextInt(adjList[current].size())).v;
+				System.out.println(current + " | " + adjList[current].size() + " | " + id + " |  " +  attempts.size());
+								
+				if (!attempts.contains(id)) {
+					attempts.add(id);
+				}
+				
+				if (!visited.contains(id)) {
+					stack.push(id);
+				}
+			}
+			searchCount++;
+
+		}
 	}
 
 	public void randomSearch(Map map) {
@@ -158,7 +215,7 @@ public class Graph {
 
 		int maxSearch = adjList.length * 4;
 		int searchCount = 0;
-		
+
 		while (searchCount <= maxSearch) {
 			try {
 				Thread.sleep(10);
@@ -166,24 +223,23 @@ public class Graph {
 				e.printStackTrace();
 			}
 
-			guess = rng.nextInt(map.grid.width * map.grid.height);	
-						
-			if (adjList[guess].size() == 0 || adjList[guess] == null ) {
+			guess = rng.nextInt(map.grid.width * map.grid.height);
+
+			if (adjList[guess].size() == 0 || adjList[guess] == null) {
 				continue;
 			}
-			
+
 			int subguess = rng.nextInt(adjList[guess].size());
-			
+
 			if (subguess < 0 || guess < 0) {
 				continue;
 			}
-			
-			System.out.println(guess);
+
 			int id = (int) adjList[guess].get(subguess).v;
 			Grid.Cell cell = map.grid.cells.get(id);
-			
-			if (!cell.isVisited) {
-				cell.isVisited = rng.nextInt(5) == 0;
+
+			if (!cell.isVisited && rng.nextInt(5) == 0) {
+				cell.visit();
 			}
 
 			map.updateCell(cell);
@@ -198,6 +254,25 @@ public class Graph {
 
 	}
 
+	public void takePath(Map map, List<Integer> path) {
+		try {
+			Thread.sleep(Configuration.getSimulationRate() * 2);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		for (int i = 0; i < path.size(); i++) {
+			try {
+				Thread.sleep(Configuration.getSimulationRate());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			map.grid.cells.get(i).traverse();
+			map.updateCell(map.grid.cells.get(i));
+		}
+	}
+
 	public void breathFirstSearch(Map map) {
 		gridToAdjList(map.grid);
 
@@ -208,14 +283,20 @@ public class Graph {
 		int current = start;
 
 		ArrayList<Integer> visited = new ArrayList<Integer>();
+		List<Integer> parents = new ArrayList<Integer>();
+
+		for (int i = 0; i < adjList.length; i++) {
+			parents.add(null);
+		}
 
 		queue.add(start);
+		visited.add(start);
 
 		int maxSearch = adjList.length;
 		int searchCount = 0;
 		while (searchCount <= maxSearch) {
 			try {
-				Thread.sleep(simulationRate);
+				Thread.sleep(Configuration.getSimulationRate());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -228,7 +309,7 @@ public class Graph {
 			}
 
 			current = queue.remove();
-			map.grid.cells.get(current).isVisited = true;
+			map.grid.cells.get(current).visit();
 			map.updateCell(map.grid.cells.get(current));
 
 			for (int i = 0; i < adjList[current].size(); i++) {
@@ -237,8 +318,7 @@ public class Graph {
 				if (!visited.contains(id)) {
 					queue.add(id);
 					visited.add(id);
-
-					System.out.println("Adj: " + id);
+					parents.add(id, current);
 				}
 			}
 			searchCount++;
@@ -247,13 +327,99 @@ public class Graph {
 				System.out.println("Found path to " + dest + "!");
 				map.grid.cells.get(current).isFound = true;
 				map.updateCell(map.grid.cells.get(current));
+
+				List<Integer> path = new ArrayList<Integer>();
+				int last = dest;
+
+				for (int i = 0; i < parents.size(); i++) {
+					System.out.println(last);
+
+					last = path.get(last);
+
+					path.add(last);
+
+					if (parents.get(i) == start) {
+						path = parents;
+					}
+				}
+
+				takePath(map, path);
+				break;
+			}
+		}
+	}
+
+	public void depthFirstSearch(Map map) {
+		gridToAdjList(map.grid);
+
+		Stack<Integer> stack = new Stack<Integer>();
+
+		int start = map.start.y * map.grid.width + map.start.x;
+		int dest = map.destination.y * map.grid.width + map.destination.x;
+		int current = start;
+
+		ArrayList<Integer> visited = new ArrayList<Integer>();
+		int[] parents = new int[map.grid.width + map.destination.x];
+
+		stack.push(start);
+		visited.add(start);
+
+		int maxSearch = adjList.length;
+		int searchCount = 0;
+		while (searchCount <= maxSearch) {
+			try {
+				Thread.sleep(Configuration.getSimulationRate());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			if (stack.isEmpty()) {
+				System.out.println("No path to " + dest + " found!");
+				map.grid.cells.get(dest).isVoid = true;
+				map.updateCell(map.grid.cells.get(dest));
+				break;
+			}
+
+			int last = current;
+			current = stack.pop();
+			visited.add(current);
+
+			map.grid.cells.get(current).visit();
+			map.updateCell(map.grid.cells.get(current));
+
+			for (int i = 0; i < adjList[current].size(); i++) {
+				int id = (int) adjList[current].get(i).v;
+
+				if (!visited.contains(id)) {
+					stack.push(id);
+				}
+			}
+			searchCount++;
+
+			if (current == dest) {
+				System.out.println("Found path to " + dest + "!");
+				map.grid.cells.get(current).isFound = true;
+				map.updateCell(map.grid.cells.get(current));
+
+				List<Integer> path = new ArrayList<Integer>();
+
+				for (int i = 0; i < parents.length; i++) {
+
+				}
+
+				// takePath(map, path);
 				break;
 			}
 
 		}
 	}
 
-	public void depthFirstSearch(Map map) {
+	private void getGridDistance() {
+		int x;
+		int y;
+	}
+
+	public void greedy(Map map) {
 		gridToAdjList(map.grid);
 
 		Stack<Integer> stack = new Stack<Integer>();
@@ -270,7 +436,7 @@ public class Graph {
 		int searchCount = 0;
 		while (searchCount <= maxSearch) {
 			try {
-				Thread.sleep(simulationRate);
+				Thread.sleep(Configuration.getSimulationRate());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -283,7 +449,7 @@ public class Graph {
 			}
 
 			current = stack.pop();
-			map.grid.cells.get(current).isVisited = true;
+			map.grid.cells.get(current).visit();
 			map.updateCell(map.grid.cells.get(current));
 
 			for (int i = 0; i < adjList[current].size(); i++) {

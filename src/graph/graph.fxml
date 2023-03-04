@@ -11,31 +11,44 @@
 
 <VBox id="path" fx:controller="graph.Controller" alignment="center" prefWidth="1600" prefHeight="900" maxWidth="Infinity" maxHeight="Infinity" minWidth="800" minHeight="400" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">     		   
     <children>
-	    <MenuBar fx:id="menuBar" id="menuBar">
+	    <MenuBar fx:id="menuBar" id="menu-bar">
 	 		<menus>
-	 			<Menu fx:id="menu" styleClass="menuBar" text="Algorithm">
+	 			<Menu fx:id="menu" styleClass="menu-bar" text="Settings">
 		 			<items>
-		 				<MenuItem styleClass="menuItem" text="Random Guess" onAction="#chooseAlgoritm"/>		 	
-		 				<MenuItem styleClass="menuItem" text="Breadth First Search" onAction="#chooseAlgoritm"/>
-		 				<MenuItem styleClass="menuItem" text="Depth First Search" onAction="#chooseAlgoritm"/>
-		 				<MenuItem styleClass="menuItem" text="Dikstra Shortest Path" onAction="#chooseAlgoritm"/>
-		 				<MenuItem styleClass="menuItem" text="A* Search" onAction="#chooseAlgoritm"/>
+		 				<MenuItem styleClass="menu-item" text="Play Animations" onAction="#toggleCanAnimate"/>		 	
+		 				<MenuItem styleClass="menu-item" text="Show Numbers" onAction="#toggleCanShowNumbers"/>		 	
+		 			</items>
+	 			</Menu>
+	 			<Menu fx:id="menu" styleClass="menu-bar" text="Algorithm">
+		 			<items>
+		 				<MenuItem styleClass="menu-item" text="Random Guess" onAction="#chooseAlgoritm"/>		 	
+		 				<MenuItem styleClass="menu-item" text="Breadth First Search" onAction="#chooseAlgoritm"/>
+		 				<MenuItem styleClass="menu-item" text="Depth First Search" onAction="#chooseAlgoritm"/>
+		 				<MenuItem styleClass="menu-item" text="Dijkstra Shortest Path" onAction="#chooseAlgoritm"/>
+		 				<MenuItem styleClass="menu-item" text="A* Search" onAction="#chooseAlgoritm"/>
+		 			</items>
+	 			</Menu>
+	 			<Menu fx:id="menu" styleClass="menu-bar" text="Map">
+		 			<items>
+		 				<MenuItem styleClass="menu-item" text="Shuffle" onAction="#chooseMaze"/>		 	
+		 				<MenuItem styleClass="menu-item" text="Maze by DFS" onAction="#chooseMaze"/>
 		 			</items>
 	 			</Menu>
 	 		</menus>
-	 	</MenuBar>
-	 	
+	 	</MenuBar>	 	
     	<Label fx:id="header" styleClass="h1" text="Pathfinder"/>
     	<Label fx:id="subheader" styleClass="h2" text="Algorithm"/>
 	    <HBox alignment="center">
-	    	<Button fx:id="gridBtn" alignment="center" styleClass="btn" text="Generate" onAction="#generate" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-	    	<Button fx:id="bfsBtn" styleClass="btn" text="Search" onAction="#search" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-	    </HBox>
-    	 
-    
-				<GridPane fx:id="gridMap" id="gridMap" prefWidth="1280" prefHeight="720" alignment="center" GridPane.columnIndex="1" GridPane.rowIndex="3">
-					<children>
-					</children>
-				</GridPane>		
+	    	<Button fx:id="generateBtn" alignment="center" styleClass="button" text="onClickMaze" onAction="#generate" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+	    	<Button fx:id="searchBtn" styleClass="button" text="Search" onAction="#onClickSearch" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+	    </HBox>   	     
+			<GridPane fx:id="gridMap" id="grid-map" prefWidth="1280" prefHeight="720" alignment="center" GridPane.columnIndex="1" GridPane.rowIndex="3">
+				<children>
+				</children>
+			</GridPane>		
+		<HBox fx:id="footer" styleClass="footer" alignment="center">
+    		<Label fx:id="visitedLabel" styleClass="p, small, stat" text="Current: "/>
+    		<Label fx:id="A" styleClass="p, small" text="Visited: "/>
+		</HBox>
     </children>	
 </VBox>

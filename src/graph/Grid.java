@@ -40,6 +40,7 @@ public class Grid {
 		boolean isVisited;
 		boolean isFound;
 		boolean isVoid;
+		boolean isPath;
 		int key;
 		int x;
 		int y;
@@ -52,8 +53,48 @@ public class Grid {
 		public final BooleanProperty getIsEmptyProperty() { return isEmptyProperty; }
 		public final ObjectProperty<Cell> getObjectProperty() { return objectProperty; }
 		
-		public Cell(boolean empty) {
-			this.isEmpty = empty;
+		public Cell() {
+			this.isEmpty = true;
+		}
+		
+		public void setEmpty(boolean isEmpty) {
+			if (!isStart && !isDest) {
+				this.isEmpty = isEmpty; 
+			}
+		}
+		
+		public void setIsStart(boolean isStart) {
+			if (isEmpty) {
+				this.isStart = isStart; 
+			}
+		}
+		
+		public void setIsDest(boolean isDest) {
+			if (isEmpty) {
+				this.isDest = isDest; 
+			}
+		}
+		
+		public void visit() {
+			if (!isVisited && isEmpty) {
+				this.isVisited = true; 
+			}
+		}
+		
+		public void traverse() {
+			if (isVisited) {
+				this.isPath = true; 
+			}
+		}
+		
+		public void reset() {
+			this.isEmpty = true; 
+			this.isStart = false; 
+			this.isDest = false; 
+			this.isFound = false; 
+			this.isPath = false; 
+			this.isVisited = false; 
+			this.isPath = false; 
 		}
 	}
 	
@@ -74,9 +115,20 @@ public class Grid {
 		grid = new Cell[width][height];
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				Random rng = new Random();
-				grid[x][y] = rng.nextInt(10) == 0 ? new Cell(false) : new Cell(true);
-				//grid[x][y] = new Cell(true);
+				grid[x][y] = new Cell();
+				grid[x][y].x = x;
+				grid[x][y].y = y;
+				cells.put(y * width + x, grid[x][y]);
+			}
+		}
+	}
+	
+	public void clear() {		
+		grid = new Cell[width][height];
+		
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				grid[x][y] = new Cell();
 				grid[x][y].x = x;
 				grid[x][y].y = y;
 				cells.put(y * width + x, grid[x][y]);
