@@ -94,24 +94,63 @@ public class Map {
 		}
 
 	}
+	
+	public double clamp(double val, double min, double max) {
+		if (val > max) {
+			return max;
+		} else if (val < min) {
+			return min;
+		} else {
+			return val;
+		}
+	}
 
 	public double lerp(double start, double end, double step) {
 		// total work x percentage of work done + initial work done
 		// ((distance) * normalized displacement) + start
 		// ((end - start) * step) + start
-
+		
 		double distance = end - start; // total work
-		return distance * step + start;
+		return clamp(distance * step + start, 0, 1);
+		
+	}
+	
+	public double boundingLerp(double start, double end, double step) {
+		// total work x percentage of work done + initial work done
+		// ((distance) * normalized displacement) + start
+		// ((end - start) * step) + start
+		// Calculate a lerp that overshoots with a sin function before returning to 1
+
+		double boundingStep = (Math.sin(4.7195 * step - Math.PI/2) + 1);
+		
+		if ((step + 0.001) >= 1) {
+			boundingStep = 1;
+		}
+			
+		double distance = end - start; // total work
+		return distance * boundingStep + start;
+
 	}
 
 	public void blendColor(Shape rect, String hex) {
 		blendColor(rect, hex, 1);
 	}
-
+	
 	public void blendColor(Shape rect, String hex, double timeScale) {
 		if (Configuration.getCanShowAnimation()) {
 			fadeAnimation(rect, Color.valueOf(hex),
-					(Configuration.simulationRate * 2) / ((timeScale > 0) ? timeScale : 0));
+					(Configuration.simulationRate * 5) / ((timeScale > 0) ? timeScale : 0));
+		}
+	}
+	
+	public void bouceColor(Shape rect, String hex) {
+		bouceColor(rect, hex, 1);
+	}
+
+	public void bouceColor(Shape rect, String hex, double timeScale) {
+		if (Configuration.getCanShowAnimation()) {
+			overFadeAnimation(rect, Color.valueOf(hex),
+					(Configuration.simulationRate * 5) / ((timeScale > 0) ? timeScale : 0));
 		}
 	}
 
@@ -122,12 +161,33 @@ public class Map {
 				setCycleDuration(Duration.millis(duration));
 				initColor = Color.valueOf(shape.getFill().toString());
 			}
+			
+			@Override
+			protected void interpolate(double step) {
+				Color color = Color.color(clamp(lerp(initColor.getRed(), finalColor.getRed(), step), 0, 1),
+						clamp(lerp(initColor.getGreen(), finalColor.getGreen(), step), 0, 1),
+						clamp(lerp(initColor.getBlue(), finalColor.getBlue(), step), 0, 1));
+				
+				shape.setFill(color);
+			}
+			
+		};
+		fade.play();
+	}
+	
+	public void overFadeAnimation(Shape shape, Color finalColor, double duration) {
+		Animation fade = new Transition() {
+			Color initColor;
+			{
+				setCycleDuration(Duration.millis(duration));
+				initColor = Color.valueOf(shape.getFill().toString());
+			}
 
 			@Override
 			protected void interpolate(double step) {
-				Color color = Color.color(lerp(initColor.getRed(), finalColor.getRed(), step),
-						lerp(initColor.getGreen(), finalColor.getGreen(), step),
-						lerp(initColor.getBlue(), finalColor.getBlue(), step));
+				Color color = Color.color(clamp(boundingLerp(initColor.getRed(), finalColor.getRed(), step), 0, 1),
+						clamp(boundingLerp(initColor.getGreen(), finalColor.getGreen(), step), 0, 1),
+						clamp(boundingLerp(initColor.getBlue(), finalColor.getBlue(), step), 0, 1));
 
 				shape.setFill(color);
 			}
@@ -161,7 +221,7 @@ public class Map {
 				Label val = (Label) mapCells.get(cell).get(1);
 
 				if (cell.isFound) {
-					blendColor(rect, "#efe498");
+					bouceColor(rect, "#efe498");
 					val.setText(":)");
 					return;
 				}
@@ -170,9 +230,10 @@ public class Map {
 					val.setText(":(");
 					return;
 				}
+				
 				if (cell.isPath) {
 					System.out.println("Path");
-					blendColor(rect, "#e58c51");
+					bouceColor(rect, "#e58c51");
 					val.setText("");
 					return;
 				}
@@ -221,7 +282,7 @@ public class Map {
 
 	public void configureVisited(Rectangle rect, Label val, Cell cell) {
 		if (cell.isVisited) {
-			blendColor(rect, "#c2e3f3", 0.8);
+			bouceColor(rect, "#c2e3f3", 0.8);
 		}
 	}
 }
