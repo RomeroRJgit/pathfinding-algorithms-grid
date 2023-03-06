@@ -145,10 +145,10 @@ public class Graph {
 	}
 
 	public void maze(Map map) {
-		map.randomize(new Random().nextInt());
-		map.updateCells();
-		
+		map.grid.empty();
 		gridToAdjList(map.grid);
+		map.grid.fill();
+		map.updateCells();
 
 		Random rng = new Random();
 
@@ -184,26 +184,37 @@ public class Graph {
 			current = stack.pop();
 			visited.add(current);
 
-			map.grid.cells.get(current).visit();
+			map.grid.cells.get(current).isEmpty = false;
+			map.grid.cells.get(current).isPath = true;
 			map.updateCell(map.grid.cells.get(current));
 
 			List<Integer> attempts = new ArrayList<Integer>();
 			while (attempts.size() < adjList[current].size() - 1) {
-				
+
 				int id = (int) adjList[current].get(rng.nextInt(adjList[current].size())).v;
-				System.out.println(current + " | " + adjList[current].size() + " | " + id + " |  " +  attempts.size());
-								
+				System.out.println(current + " | " + adjList[current].size() + " | " + id + " |  " + attempts.size());
+
 				if (!attempts.contains(id)) {
 					attempts.add(id);
 				}
-				
+
 				if (!visited.contains(id)) {
 					stack.push(id);
 				}
 			}
 			searchCount++;
-
 		}
+
+		for (int y = 0; y < map.grid.height; y++) {
+			for (int x = 0; x < map.grid.width; x++) {
+				if (map.grid.cells.get(y * map.grid.width + x).isPath) {
+					map.grid.cells.get(y * map.grid.width + x).isPath = false;
+					map.grid.cells.get(y * map.grid.width + x).isEmpty = true;
+					map.updateCell(map.grid.cells.get(y * map.grid.width + x));
+				}
+			}
+		}
+		map.updateCells();
 	}
 
 	public void randomSearch(Map map) {
