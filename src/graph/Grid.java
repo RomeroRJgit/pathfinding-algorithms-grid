@@ -75,6 +75,10 @@ public class Grid {
 			}
 		}
 		
+		public void setIsVisited(boolean isVisited) {
+			this.isVisited = isVisited; 
+		}
+		
 		public void visit() {
 			if (!isVisited && isEmpty) {
 				this.isVisited = true; 
@@ -135,7 +139,22 @@ public class Grid {
 			}
 		}
 	}
+	
+	public void empty() {				
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				grid[x][y].setEmpty(true);				
+			}
+		}
+	}
+	
+	public void fill() {				
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				grid[x][y].setEmpty(false);				
+			}
+		}
+	}
 
-	
-	
+		
 }
